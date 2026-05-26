@@ -1,0 +1,29 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="64" height="64" rx="18" fill="#D9F2F0"/>
+  <circle cx="32" cy="32" r="25" fill="#FFFDF6"/>
+  <path
+    d="M21.5 25.5C21.5 17.9 26.7 13.5 32 13.5C37.3 13.5 42.5 17.9 42.5 25.5C42.5 31.2 39.1 36.1 38.2 42.8C37.4 48.8 35.6 54 32.6 54C30.6 54 30.1 48.7 28.8 44.1C27.5 48.7 26.8 54 24.8 54C21.9 54 20.1 48.8 19.5 42.8C18.8 36.2 21.5 31.3 21.5 25.5Z"
+    fill="url(#toothGradient)"
+    stroke="#11736F"
+    stroke-width="2"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M26 20.5C28.1 18.8 31.2 18.2 34.2 19"
+    stroke="white"
+    stroke-width="3"
+    stroke-linecap="round"
+    opacity="0.9"
+  />
+  <path
+    d="M43.5 12L45.6 17.1L51 19.2L45.6 21.3L43.5 26.5L41.4 21.3L36 19.2L41.4 17.1L43.5 12Z"
+    fill="#2AA7A0"
+  />
+  <defs>
+    <linearGradient id="toothGradient" x1="25" y1="16" x2="40" y2="53" gradientUnits="userSpaceOnUse">
+      <stop stop-color="white"/>
+      <stop offset="0.52" stop-color="#FFFDF6"/>
+      <stop offset="1" stop-color="#EFE6CC"/>
+    </linearGradient>
+  </defs>
+</svg>
