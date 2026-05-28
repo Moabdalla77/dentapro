@@ -1,6 +1,6 @@
 # DentaPro React Booking App
 
-DentaPro is now a standard client-side React app built with Vite. It includes a full dental clinic landing page, a patient booking form, Supabase storage, double-booking protection, and a simple admin dashboard.
+DentaPro is a client-side React app built with Vite. It includes a dental clinic landing page, patient appointment booking, Supabase storage, double-booking protection, and a simple authenticated admin dashboard.
 
 ## Project Structure
 
@@ -10,7 +10,10 @@ dentapro/
 ├── vite.config.js
 ├── supabase.sql
 ├── public/
+│   ├── favicon.ico
+│   ├── favicon.svg
 │   └── assets/images/
+│       └── clinic-hero.png
 ├── src/
 │   ├── App.jsx
 │   ├── main.jsx
@@ -18,14 +21,23 @@ dentapro/
 │   ├── components/
 │   │   ├── BeforeAfterSlider.jsx
 │   │   ├── BookingForm.jsx
-│   │   └── Layout.jsx
+│   │   ├── HeroToothScene.jsx
+│   │   ├── Layout.jsx
+│   │   ├── MotionSection.jsx
+│   │   └── ToothViewer.jsx
+│   ├── features/
+│   │   └── booking/
+│   │       └── constants.js
 │   ├── lib/
 │   │   └── supabaseClient.js
 │   ├── pages/
 │   │   ├── AdminDashboard.jsx
 │   │   └── HomePage.jsx
-│   └── services/
-│       └── appointments.js
+│   ├── services/
+│   │   └── appointments.js
+│   └── shared/
+│       └── config/
+│           └── contact.js
 ├── package.json
 ├── postcss.config.js
 └── tailwind.config.js
@@ -45,10 +57,10 @@ npm install
 
 ```bash
 VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+VITE_SUPABASE_PUBLISHABLE_KEY=your-supabase-publishable-key
 ```
 
-The app also accepts the old `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` names, so existing values can keep working while you switch to Vite.
+The app also accepts the older `VITE_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_SUPABASE_URL`, and `NEXT_PUBLIC_SUPABASE_ANON_KEY` names for compatibility.
 
 4. Start the app:
 
@@ -61,7 +73,7 @@ Open `http://localhost:4028`.
 ## Pages
 
 - `/` shows the clinic landing page with hero, services, gallery, before/after sliders, testimonials, pricing, contact, and booking form.
-- `/admin` shows all appointments and lets staff mark them as `confirmed` or `cancelled`.
+- `/admin` lets authenticated staff view appointments and mark them as `confirmed` or `cancelled`.
 
 ## Supabase Table
 
@@ -79,7 +91,7 @@ The app expects an `appointments` table with:
 - `notes`
 - `status`
 
-The SQL also creates a unique active slot rule so the same date and time cannot be booked twice unless the old appointment is cancelled.
+The SQL creates a unique active slot rule so the same date and time cannot be booked twice unless the old appointment is cancelled.
 
 ## Scripts
 
@@ -88,3 +100,10 @@ The SQL also creates a unique active slot rule so the same date and time cannot 
 - `npm run preview` previews the production build.
 - `npm run lint` checks the source files.
 - `npm run format` formats the source files.
+
+## GitHub Upload Checklist
+
+- Keep `.env` private and untracked.
+- Commit `.env.example` so collaborators know which variables are required.
+- Do not commit `node_modules`, `dist`, `.npm-cache`, or local agent/tooling folders.
+- Run `npm run lint` and `npm run build` before pushing.

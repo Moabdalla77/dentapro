@@ -27,7 +27,10 @@ where status <> 'cancelled';
 -- Supabase Data API access for the browser client.
 -- Run this in the Supabase SQL editor after creating/selecting your project.
 grant usage on schema public to anon, authenticated;
-grant select, insert, update on table public.appointments to anon, authenticated;
+revoke all on table public.appointments from anon, authenticated;
+grant insert on table public.appointments to anon, authenticated;
+grant select (date, time, status) on table public.appointments to anon;
+grant select, update on table public.appointments to authenticated;
 grant usage, select on all sequences in schema public to anon, authenticated;
 
 alter table public.appointments enable row level security;
@@ -35,6 +38,8 @@ alter table public.appointments enable row level security;
 drop policy if exists "Public can create pending appointment requests" on public.appointments;
 drop policy if exists "Public can read appointment slots" on public.appointments;
 drop policy if exists "Public can update appointment status" on public.appointments;
+drop policy if exists "Staff can read appointment details" on public.appointments;
+drop policy if exists "Staff can update appointment status" on public.appointments;
 
 create policy "Public can create pending appointment requests"
 on public.appointments
@@ -53,12 +58,18 @@ with check (
 create policy "Public can read appointment slots"
 on public.appointments
 for select
-to anon, authenticated
+to anon
 using (true);
 
-create policy "Public can update appointment status"
+create policy "Staff can read appointment details"
+on public.appointments
+for select
+to authenticated
+using (true);
+
+create policy "Staff can update appointment status"
 on public.appointments
 for update
-to anon, authenticated
+to authenticated
 using (true)
 with check (status in ('pending', 'confirmed', 'cancelled'));

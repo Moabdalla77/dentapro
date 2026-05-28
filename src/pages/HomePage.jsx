@@ -21,12 +21,12 @@ import {
 import BookingForm from '../components/BookingForm';
 import BeforeAfterSlider from '../components/BeforeAfterSlider';
 import MotionSection from '../components/MotionSection';
+import { clinicContact } from '../shared/config/contact';
 
 const HeroToothScene = lazy(() => import('../components/HeroToothScene.jsx'));
 const ToothViewer = lazy(() => import('../components/ToothViewer.jsx'));
 
-const heroImage =
-  'public/assets/images/ChatGPT Image May 20, 2026, 08_45_59 AM.png';
+const heroImage = '/assets/images/clinic-hero.png';
 
 const services = [
   {
@@ -554,7 +554,7 @@ export default function HomePage({ language = 'en' }) {
               saving and the admin dashboard can confirm or cancel each request.
             </p>
             <div className="mt-8 grid gap-4">
-              <InfoLine icon={Clock} text="Open Saturday to Thursday, 9:00 AM - 8:00 PM" />
+              <InfoLine icon={Clock} text={`Open ${clinicContact.hours}`} />
               <InfoLine icon={Syringe} text="Emergency cases are reviewed first" />
               <InfoLine icon={Award} text="Designed for a simple non-programmer workflow" />
             </div>
@@ -602,14 +602,18 @@ export default function HomePage({ language = 'en' }) {
             </p>
 
             <div className="contact-panel mt-8">
-              <ContactLine icon={MapPin} label="24 Bright Smile Avenue, Suite 8" />
-              <ContactLine icon={Phone} label="+1 800 555 1234" href="tel:+18005551234" />
+              <ContactLine icon={MapPin} label={clinicContact.address} />
+              <ContactLine
+                icon={Phone}
+                label={clinicContact.phoneDisplay}
+                href={`tel:${clinicContact.phoneHref}`}
+              />
               <ContactLine
                 icon={Mail}
-                label="hello@dentapro.com"
-                href="mailto:hello@dentapro.com"
+                label={clinicContact.email}
+                href={`mailto:${clinicContact.email}`}
               />
-              <ContactLine icon={Clock} label="Saturday to Thursday, 9:00 AM - 8:00 PM" />
+              <ContactLine icon={Clock} label={clinicContact.hours} />
             </div>
 
             <div className="clinic-options">
@@ -631,13 +635,13 @@ export default function HomePage({ language = 'en' }) {
           <div className="map-card reveal reveal-delay-2">
             <iframe
               title="Dr. Ahmed Afify clinic map"
-              src="https://www.google.com/maps?q=24%20Bright%20Smile%20Avenue%20Suite%208&output=embed"
+              src={`https://www.google.com/maps?q=${clinicContact.mapsQuery}&output=embed`}
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
             />
             <div className="map-actions">
               <a
-                href="https://www.google.com/maps/search/?api=1&query=24%20Bright%20Smile%20Avenue%20Suite%208"
+                href={`https://www.google.com/maps/search/?api=1&query=${clinicContact.mapsQuery}`}
                 target="_blank"
                 rel="noreferrer"
                 className="summary-cta"
@@ -645,11 +649,11 @@ export default function HomePage({ language = 'en' }) {
                 <Navigation className="h-4 w-4" />
                 Get Directions
               </a>
-              <a href="tel:+18005551234" className="ghost-map-button">
+              <a href={`tel:${clinicContact.phoneHref}`} className="ghost-map-button">
                 <Phone className="h-4 w-4" />
                 Call Clinic
               </a>
-              <a href="mailto:hello@dentapro.com" className="ghost-map-button">
+              <a href={`mailto:${clinicContact.email}`} className="ghost-map-button">
                 <ExternalLink className="h-4 w-4" />
                 Email Us
               </a>
@@ -658,7 +662,11 @@ export default function HomePage({ language = 'en' }) {
         </div>
       </section>
 
-      <a href="https://wa.me/18005551234" className="whatsapp-float" aria-label="Chat on WhatsApp">
+      <a
+        href={`https://wa.me/${clinicContact.phoneHref.replace('+', '')}`}
+        className="whatsapp-float"
+        aria-label="Chat on WhatsApp"
+      >
         <MessageCircle className="h-7 w-7" />
       </a>
     </main>

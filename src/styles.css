@@ -552,7 +552,6 @@ textarea {
 }
 
 .premium-card,
-.pricing-card,
 .faq-item {
   border: 1px solid #d6ecea;
   border-radius: 1.25rem;
@@ -566,7 +565,6 @@ textarea {
 }
 
 .premium-card:hover,
-.pricing-card:hover,
 .faq-item:hover {
   transform: translateY(-4px);
   border-color: rgba(42, 167, 160, 0.36);

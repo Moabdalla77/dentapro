@@ -20,12 +20,6 @@ export default {
           light: '#fffdf6',
           dark: '#11736f',
         },
-        coral: {
-          50: '#fff1ed',
-          200: '#fecab8',
-          600: '#dc5a3a',
-          700: '#b64225',
-        },
       },
     },
   },

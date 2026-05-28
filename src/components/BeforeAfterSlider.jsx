@@ -28,7 +28,7 @@ export default function BeforeAfterSlider({ before, after, title }) {
         min="8"
         max="92"
         value={position}
-        onChange={(event) => setPosition(event.target.value)}
+        onChange={(event) => setPosition(Number(event.target.value))}
         className="before-after-range"
         aria-label={`Compare before and after for ${title}`}
       />

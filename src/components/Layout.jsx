@@ -1,6 +1,7 @@
 import { Link, NavLink } from 'react-router-dom';
 import { LayoutDashboard, Menu, Phone, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { clinicContact } from '../shared/config/contact';
 
 const navItems = [
   { label: 'Services', href: '/#services' },
@@ -42,10 +43,10 @@ export default function Layout({ children, language = 'en', onToggleLanguage }) 
                   scrolled || open ? 'text-teal-950' : 'text-enamel'
                 }`}
               >
-                Dr. Ahmed Afify
+                {clinicContact.name}
               </p>
               <p className={`text-xs ${scrolled || open ? 'text-slate-500' : 'text-white/70'}`}>
-                Dental Clinic
+                {clinicContact.label}
               </p>
             </div>
           </Link>
@@ -80,7 +81,7 @@ export default function Layout({ children, language = 'en', onToggleLanguage }) 
               Admin
             </NavLink>
             <a
-              href="tel:+18005551234"
+              href={`tel:${clinicContact.phoneHref}`}
               className={`ml-2 inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-semibold transition ${
                 scrolled
                   ? 'border-clinic-100 text-slate-700 hover:border-clinic-500/40 hover:bg-clinic-100'
@@ -151,8 +152,8 @@ export default function Layout({ children, language = 'en', onToggleLanguage }) 
 
       <footer className="border-t border-stone-200 bg-white">
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-6 py-7 text-sm text-stone-500 md:flex-row md:items-center md:justify-between">
-          <p>Dr. Ahmed Afify Dental Clinic. Care for brighter, healthier smiles.</p>
-          <p>Open Saturday to Thursday, 9:00 AM - 8:00 PM</p>
+          <p>{clinicContact.name} {clinicContact.label}. Care for brighter, healthier smiles.</p>
+          <p>Open {clinicContact.hours}</p>
         </div>
       </footer>
     </div>

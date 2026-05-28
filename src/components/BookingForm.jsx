@@ -3,34 +3,15 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { CalendarCheck, Loader2, Mail, MessageCircle } from 'lucide-react';
 import { createAppointment, fetchBookedSlots } from '../services/appointments';
 import { isSupabaseConfigured, supabaseConfigError } from '../lib/supabaseClient';
+import {
+  buildTimeSlots,
+  genderOptions,
+  initialBookingForm,
+  treatmentOptions,
+} from '../features/booking/constants';
+import { clinicContact } from '../shared/config/contact';
 
-const initialForm = {
-  name: '',
-  email: '',
-  phone: '',
-  treatment_interest: '',
-  age: '',
-  gender: '',
-  date: '',
-  time: '',
-  notes: '',
-};
-
-const treatmentOptions = [
-  'Teeth Whitening',
-  'Porcelain Veneers',
-  'Dental Implants',
-  'Clear Aligners',
-  'Deep Cleaning',
-  'Check-Up + X-Rays',
-  'Emergency Visit',
-  'Smile Design Consultation',
-];
-
-const genderOptions = ['Female', 'Male', 'Prefer not to say'];
 const arGenderOptions = ['أنثى', 'ذكر', 'أفضل عدم الإجابة'];
-const clinicPhone = '2018005551234';
-const clinicEmail = 'hello@dentapro.com';
 
 const bookingCopy = {
   en: {
@@ -79,21 +60,12 @@ const bookingCopy = {
   },
 };
 
-const buildTimeSlots = () => {
-  const slots = [];
-  for (let hour = 9; hour < 20; hour += 1) {
-    slots.push(`${String(hour).padStart(2, '0')}:00`);
-    slots.push(`${String(hour).padStart(2, '0')}:30`);
-  }
-  return slots;
-};
-
 const timeSlots = buildTimeSlots();
 const getTodayValue = () => new Date().toISOString().slice(0, 10);
 const isFriday = (date) => date && new Date(`${date}T12:00:00`).getDay() === 5;
 
 export default function BookingForm({ variant = 'default', language = 'en' }) {
-  const [form, setForm] = useState(initialForm);
+  const [form, setForm] = useState(initialBookingForm);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -158,7 +130,7 @@ export default function BookingForm({ variant = 'default', language = 'en' }) {
       await createAppointment(form);
       setMessage(copy.success);
       setLastBooking(form);
-      setForm(initialForm);
+      setForm(initialBookingForm);
       setBookedSlots([]);
     } catch (appointmentError) {
       const isNetworkError =
@@ -386,12 +358,12 @@ Notes: ${lastBooking.notes || '-'}`
         ) : (
           <CalendarCheck className="h-5 w-5" />
         )}
-        Submit booking
+        {copy.submit}
       </motion.button>
       {lastBooking && (
         <div className="grid gap-2 sm:grid-cols-2">
           <a
-            href={`https://wa.me/${clinicPhone}?text=${encodedNotification}`}
+            href={`https://wa.me/${clinicContact.whatsappPhone}?text=${encodedNotification}`}
             target="_blank"
             rel="noreferrer"
             className="ghost-notify-button"
@@ -400,7 +372,7 @@ Notes: ${lastBooking.notes || '-'}`
             {copy.notify}
           </a>
           <a
-            href={`mailto:${clinicEmail}?subject=New appointment request&body=${encodedNotification}`}
+            href={`mailto:${clinicContact.email}?subject=New appointment request&body=${encodedNotification}`}
             className="ghost-notify-button"
           >
             <Mail className="h-4 w-4" />
