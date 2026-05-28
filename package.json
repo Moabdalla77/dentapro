@@ -2,6 +2,24 @@
   "name": "dentapro",
   "version": "0.1.0",
   "private": true,
+  "description": "Modern dental clinic website and appointment booking system built with React, Vite, Tailwind CSS, and Supabase.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Moabdalla77/dentapro.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Moabdalla77/dentapro/issues"
+  },
+  "homepage": "https://github.com/Moabdalla77/dentapro#readme",
+  "license": "UNLICENSED",
+  "keywords": [
+    "react",
+    "vite",
+    "supabase",
+    "tailwindcss",
+    "booking",
+    "dental-clinic"
+  ],
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
