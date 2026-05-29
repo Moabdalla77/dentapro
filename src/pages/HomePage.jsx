@@ -23,7 +23,6 @@ import BeforeAfterSlider from '../components/BeforeAfterSlider';
 import MotionSection from '../components/MotionSection';
 import { clinicContact } from '../shared/config/contact';
 
-const HeroToothScene = lazy(() => import('../components/HeroToothScene.jsx'));
 const ToothViewer = lazy(() => import('../components/ToothViewer.jsx'));
 
 const heroImage = '/assets/images/clinic-hero.png';
@@ -79,6 +78,7 @@ const pageCopy = {
     heroText:
       'Dr. Ahmed Afify brings cosmetic dentistry, preventive care, transparent pricing, and real appointment booking together in one polished experience.',
     book: 'Book Appointment',
+    call: 'Call Clinic',
     gallery: 'View Transformations',
     clinicView: 'Clinic View',
     clinicTitle: 'A calm place for confident care.',
@@ -102,6 +102,7 @@ const pageCopy = {
     heroText:
       'يقدم د. أحمد عفيفي طب الأسنان التجميلي والوقائي مع أسعار واضحة وحجز مواعيد مباشر في تجربة بسيطة ومنظمة.',
     book: 'احجز موعد',
+    call: 'اتصل بالعيادة',
     gallery: 'شاهد النتائج',
     clinicView: 'صورة العيادة',
     clinicTitle: 'مكان هادئ لعناية واثقة.',
@@ -109,8 +110,8 @@ const pageCopy = {
     aboutEyebrow: 'عن الطبيب',
     aboutTitle: 'تعرف على د. أحمد عفيفي.',
     aboutText:
-      'طبيب أسنان يهتم براحة المريض، شرح الخطة العلاجية بوضوح، وتقديم حلول تجميلية وترميمية حديثة.',
-    aboutPoints: ['شرح واضح قبل العلاج', 'اهتمام بالوقاية أولاً', 'تخطيط علاجي تجميلي وترميمي'],
+      'طبيب أسنان يهتم براحة المريض، وشرح الخطة العلاجية بوضوح، وتقديم حلول تجميلية وترميمية حديثة.',
+    aboutPoints: ['شرح واضح قبل العلاج', 'اهتمام بالوقاية أولا', 'تخطيط علاجي تجميلي وترميمي'],
     servicesEyebrow: 'الخدمات',
     servicesTitle: 'كل ما تحتاجه ابتسامتك براحة ووضوح.',
     servicesText: 'تجربة عيادة منظمة للزيارات الدورية، التجميل، والحالات العاجلة.',
@@ -118,7 +119,6 @@ const pageCopy = {
     bestFor: 'مناسب لـ',
   },
 };
-
 const gallery = [
   {
     title: 'Whitening Transformation',
@@ -217,10 +217,10 @@ export default function HomePage({ language = 'en' }) {
   const formatCurrency = (value) => `$${value.toLocaleString()}`;
   const preferenceNote =
     appointmentPreference < 34
-      ? 'Standard booking — usually 1–2 weeks out.'
+      ? 'Standard booking - usually 1-2 weeks out.'
       : appointmentPreference > 66
-        ? 'Priority booking available — contact us directly.'
-        : 'Appointments typically available within 3–5 days.';
+        ? 'Priority booking available - contact us directly.'
+        : 'Appointments typically available within 3-5 days.';
 
   useEffect(() => {
     const nodes = document.querySelectorAll('.reveal');
@@ -249,10 +249,6 @@ export default function HomePage({ language = 'en' }) {
           className="hero-image"
         />
         <div className="hero-overlay" />
-        <Suspense fallback={<div className="hero-tooth-skeleton" aria-hidden="true" />}>
-          <HeroToothScene />
-        </Suspense>
-
         <div className="relative mx-auto grid min-h-screen max-w-7xl content-center gap-10 px-6 pb-16 pt-28 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
           <div className="animate-in-hero text-white">
             <span className="service-pill border-white/20 bg-white/10 text-gold-light">
@@ -273,20 +269,6 @@ export default function HomePage({ language = 'en' }) {
                 {copy.book}
                 <ArrowRight className="h-5 w-5" />
               </motion.a>
-              <motion.a
-                href="#gallery"
-                className="ghost-button"
-                whileHover={{ y: -2 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                {copy.gallery}
-              </motion.a>
-            </div>
-
-            <div className="mt-12 grid max-w-xl grid-cols-3 gap-3">
-              <Stat value="12k+" label="Smiles" />
-              <Stat value="4.9" label="Rating" />
-              <Stat value="24h" label="Fast reply" />
             </div>
           </div>
 
@@ -294,6 +276,12 @@ export default function HomePage({ language = 'en' }) {
             <BookingForm variant="hero" language={language} />
           </div>
         </div>
+      </section>
+
+      <section className="trust-strip" aria-label="Clinic highlights">
+        <Stat value="12k+" label="Smiles" />
+        <Stat value="4.9" label="Rating" />
+        <Stat value="24h" label="Fast reply" />
       </section>
 
       <section id="doctor" className="doctor-profile-section">
@@ -669,6 +657,17 @@ export default function HomePage({ language = 'en' }) {
       >
         <MessageCircle className="h-7 w-7" />
       </a>
+
+      <div className="mobile-action-bar" aria-label="Quick appointment actions">
+        <a href="#booking" className="mobile-action-primary">
+          {copy.book}
+          <ArrowRight className="h-4 w-4" />
+        </a>
+        <a href={`tel:${clinicContact.phoneHref}`} className="mobile-action-secondary">
+          <Phone className="h-4 w-4" />
+          {copy.call}
+        </a>
+      </div>
     </main>
   );
 }
@@ -691,11 +690,9 @@ function SectionHeader({ eyebrow, title, text, tone = 'light' }) {
 
 function Stat({ value, label }) {
   return (
-    <div className="rounded-lg border border-white/20 bg-white/10 p-4 backdrop-blur">
-      <p className="text-3xl font-bold text-gold-light">{value}</p>
-      <p className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/60">
-        {label}
-      </p>
+    <div className="stat-card">
+      <p>{value}</p>
+      <span>{label}</span>
     </div>
   );
 }
