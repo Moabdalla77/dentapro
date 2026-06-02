@@ -24,13 +24,14 @@ import MotionSection from '../components/MotionSection';
 import { clinicContact } from '../shared/config/contact';
 
 const ToothViewer = lazy(() => import('../components/ToothViewer.jsx'));
+const HeroToothScene = lazy(() => import('../components/HeroToothScene.jsx'));
 
 const heroImage = '/assets/images/clinic-hero.png';
 
 const services = [
   {
     title: 'Smile Design',
-    arTitle: 'تصميم الابتسامة',
+    arTitle: 'شكل الابتسامة',
     text: 'Veneers, bonding, whitening, and subtle finishing for a confident natural smile.',
     arText: 'فينير، حشوات تجميلية، تبييض، ولمسات نهائية لابتسامة طبيعية وواثقة.',
     duration: '45-90 min',
@@ -249,6 +250,9 @@ export default function HomePage({ language = 'en' }) {
           className="hero-image"
         />
         <div className="hero-overlay" />
+        <Suspense fallback={<div className="hero-tooth-skeleton" aria-hidden="true" />}>
+          <HeroToothScene />
+        </Suspense>
         <div className="relative mx-auto grid min-h-screen max-w-7xl content-center gap-10 px-6 pb-16 pt-28 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
           <div className="animate-in-hero text-white">
             <span className="service-pill border-white/20 bg-white/10 text-gold-light">
@@ -655,7 +659,8 @@ export default function HomePage({ language = 'en' }) {
         className="whatsapp-float"
         aria-label="Chat on WhatsApp"
       >
-        <MessageCircle className="h-7 w-7" />
+        <MessageCircle className="h-5 w-5" />
+        <span>WhatsApp</span>
       </a>
 
       <div className="mobile-action-bar" aria-label="Quick appointment actions">

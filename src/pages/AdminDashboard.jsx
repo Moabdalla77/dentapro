@@ -1,13 +1,37 @@
-import { useEffect, useState } from 'react';
-import { Check, Loader2, Lock, LogOut, RefreshCw, X } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  CalendarDays,
+  Check,
+  Clock,
+  Loader2,
+  Lock,
+  LogOut,
+  Mail,
+  Phone,
+  RefreshCw,
+  Search,
+  UserRound,
+  X,
+} from 'lucide-react';
 import { fetchAppointments, updateAppointmentStatus } from '../services/appointments';
 import { isSupabaseConfigured, supabase, supabaseConfigError } from '../lib/supabaseClient';
 
 const statusStyles = {
-  pending: 'bg-amber-50 text-amber-800 ring-amber-200',
-  confirmed: 'bg-emerald-50 text-emerald-800 ring-emerald-200',
-  cancelled: 'bg-rose-50 text-rose-800 ring-rose-200',
+  pending: 'admin-status-pending',
+  confirmed: 'admin-status-confirmed',
+  cancelled: 'admin-status-cancelled',
 };
+
+const statusOptions = ['all', 'pending', 'confirmed', 'cancelled'];
+
+function formatDate(value) {
+  if (!value) return '-';
+  const date = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', year: 'numeric' }).format(
+    date
+  );
+}
 
 export default function AdminDashboard() {
   const [appointments, setAppointments] = useState([]);
@@ -16,6 +40,8 @@ export default function AdminDashboard() {
   const [authLoading, setAuthLoading] = useState(true);
   const [session, setSession] = useState(null);
   const [credentials, setCredentials] = useState({ email: '', password: '' });
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [query, setQuery] = useState('');
   const [error, setError] = useState('');
 
   const loadAppointments = async () => {
@@ -73,6 +99,43 @@ export default function AdminDashboard() {
     };
   }, []);
 
+  const metrics = useMemo(() => {
+    const pending = appointments.filter((appointment) => appointment.status === 'pending').length;
+    const confirmed = appointments.filter(
+      (appointment) => appointment.status === 'confirmed'
+    ).length;
+    const cancelled = appointments.filter(
+      (appointment) => appointment.status === 'cancelled'
+    ).length;
+
+    return [
+      { label: 'Total requests', value: appointments.length, tone: 'neutral' },
+      { label: 'Needs review', value: pending, tone: 'pending' },
+      { label: 'Confirmed', value: confirmed, tone: 'confirmed' },
+      { label: 'Cancelled', value: cancelled, tone: 'cancelled' },
+    ];
+  }, [appointments]);
+
+  const filteredAppointments = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+
+    return appointments.filter((appointment) => {
+      const matchesStatus = statusFilter === 'all' || appointment.status === statusFilter;
+      const searchable = [
+        appointment.name,
+        appointment.email,
+        appointment.phone,
+        appointment.treatment_interest,
+        appointment.notes,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+
+      return matchesStatus && (!normalizedQuery || searchable.includes(normalizedQuery));
+    });
+  }, [appointments, query, statusFilter]);
+
   const handleCredentialChange = (event) => {
     const { name, value } = event.target;
     setCredentials((current) => ({ ...current, [name]: value }));
@@ -113,8 +176,8 @@ export default function AdminDashboard() {
 
   if (authLoading) {
     return (
-      <main className="mx-auto grid min-h-[calc(100vh-8rem)] max-w-6xl place-items-center px-4 py-10 sm:px-6">
-        <div className="flex items-center gap-3 text-slate-600">
+      <main className="admin-shell admin-centered">
+        <div className="admin-loading">
           <Loader2 className="h-5 w-5 animate-spin" />
           Loading admin access
         </div>
@@ -124,20 +187,17 @@ export default function AdminDashboard() {
 
   if (!session) {
     return (
-      <main className="mx-auto grid min-h-[calc(100vh-8rem)] max-w-md place-items-center px-4 py-10 sm:px-6">
-        <form
-          onSubmit={handleLogin}
-          className="w-full rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
-        >
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-clinic-100 text-clinic-700">
+      <main className="admin-auth-shell">
+        <form onSubmit={handleLogin} className="admin-auth-card">
+          <div className="admin-auth-icon">
             <Lock className="h-6 w-6" />
           </div>
-          <h1 className="mt-5 text-2xl font-bold text-slate-950">Admin sign in</h1>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            Sign in with the clinic staff account to view and manage appointment requests.
-          </p>
-          <div className="mt-5 grid gap-4">
-            <label className="grid gap-2 text-sm font-semibold text-slate-700">
+          <p className="admin-kicker">Staff access</p>
+          <h1>Admin sign in</h1>
+          <p>Use the clinic staff account to review and manage appointment requests.</p>
+
+          <div className="admin-auth-fields">
+            <label>
               Email
               <input
                 name="email"
@@ -148,7 +208,7 @@ export default function AdminDashboard() {
                 required
               />
             </label>
-            <label className="grid gap-2 text-sm font-semibold text-slate-700">
+            <label>
               Password
               <input
                 name="password"
@@ -160,10 +220,10 @@ export default function AdminDashboard() {
               />
             </label>
           </div>
-          {error && (
-            <p className="mt-4 rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-800">{error}</p>
-          )}
-          <button type="submit" className="gold-button mt-5 w-full justify-center">
+
+          {error && <p className="admin-error">{error}</p>}
+
+          <button type="submit" className="gold-button admin-auth-submit">
             Sign in
           </button>
         </form>
@@ -172,43 +232,69 @@ export default function AdminDashboard() {
   }
 
   return (
-    <main className="mx-auto min-h-[calc(100vh-8rem)] max-w-6xl px-4 py-10 sm:px-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <main className="admin-shell">
+      <header className="admin-hero">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-teal-700">Admin</p>
-          <h1 className="mt-2 text-3xl font-bold text-slate-950">Appointment dashboard</h1>
-          <p className="mt-2 text-slate-600">View bookings and update their status.</p>
+          <p className="admin-kicker">Admin</p>
+          <h1>Appointment dashboard</h1>
+          <p>Review requests, contact patients, and keep visit status clear.</p>
         </div>
-        <button
-          type="button"
-          onClick={loadAppointments}
-          className="inline-flex items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-        >
-          <RefreshCw className="h-4 w-4" />
-          Refresh
-        </button>
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="inline-flex items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-        >
-          <LogOut className="h-4 w-4" />
-          Sign out
-        </button>
-      </div>
+        <div className="admin-header-actions">
+          <button type="button" onClick={loadAppointments} className="admin-ghost-button">
+            <RefreshCw className="h-4 w-4" />
+            Refresh
+          </button>
+          <button type="button" onClick={handleLogout} className="admin-ghost-button">
+            <LogOut className="h-4 w-4" />
+            Sign out
+          </button>
+        </div>
+      </header>
 
-      {error && (
-        <p className="mt-6 rounded-md bg-rose-50 px-3 py-2 text-sm text-rose-800">{error}</p>
-      )}
+      <section className="admin-metrics" aria-label="Appointment summary">
+        {metrics.map((metric) => (
+          <article key={metric.label} className={`admin-metric admin-metric-${metric.tone}`}>
+            <span>{metric.label}</span>
+            <strong>{metric.value}</strong>
+          </article>
+        ))}
+      </section>
 
-      <section className="mt-6 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+      <section className="admin-panel">
+        <div className="admin-toolbar">
+          <label className="admin-search">
+            <Search className="h-4 w-4" />
+            <input
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search patient, phone, treatment..."
+            />
+          </label>
+
+          <div className="admin-status-tabs" aria-label="Filter appointments by status">
+            {statusOptions.map((status) => (
+              <button
+                key={status}
+                type="button"
+                onClick={() => setStatusFilter(status)}
+                className={statusFilter === status ? 'active' : ''}
+              >
+                {status}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {error && <p className="admin-error">{error}</p>}
+
         {loading ? (
-          <div className="grid gap-3 p-6">
-            <div className="flex items-center gap-3 text-slate-600">
+          <div className="admin-loading-block">
+            <div className="admin-loading">
               <Loader2 className="h-5 w-5 animate-spin" />
               Loading appointments
             </div>
-            {[1, 2, 3].map((row) => (
+            {[1, 2, 3, 4].map((row) => (
               <div key={row} className="admin-skeleton-row">
                 <span />
                 <span />
@@ -217,92 +303,147 @@ export default function AdminDashboard() {
               </div>
             ))}
           </div>
-        ) : appointments.length === 0 ? (
-          <p className="p-10 text-center text-slate-500">No bookings yet.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-200 text-sm">
-              <thead className="bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
-                <tr>
-                  <th className="px-4 py-3">Patient</th>
-                  <th className="px-4 py-3">Email</th>
-                  <th className="px-4 py-3">Phone</th>
-                  <th className="px-4 py-3">Treatment</th>
-                  <th className="px-4 py-3">Age</th>
-                  <th className="px-4 py-3">Gender</th>
-                  <th className="px-4 py-3">Preferred date</th>
-                  <th className="px-4 py-3">Preferred time</th>
-                  <th className="px-4 py-3">Notes</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {appointments.map((appointment) => (
-                  <tr key={appointment.id}>
-                    <td className="whitespace-nowrap px-4 py-4 font-semibold text-slate-900">
-                      {appointment.name}
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-4 text-slate-600">
-                      {appointment.email || '-'}
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-4 text-slate-600">
-                      {appointment.phone}
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-4 text-slate-600">
-                      {appointment.treatment_interest || '-'}
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-4 text-slate-600">
-                      {appointment.age || '-'}
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-4 text-slate-600">
-                      {appointment.gender || '-'}
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-4 text-slate-600">
-                      {appointment.date}
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-4 text-slate-600">
-                      {appointment.time}
-                    </td>
-                    <td className="max-w-xs px-4 py-4 text-slate-600">
-                      <span className="line-clamp-2">{appointment.notes || '-'}</span>
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-4">
-                      <span
-                        className={`rounded-md px-2 py-1 text-xs font-bold ring-1 ${statusStyles[appointment.status] || statusStyles.pending}`}
-                      >
-                        {appointment.status}
-                      </span>
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-4 text-right">
-                      <div className="inline-flex gap-2">
-                        <button
-                          type="button"
-                          disabled={savingId === appointment.id}
-                          onClick={() => handleStatus(appointment.id, 'confirmed')}
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-60"
-                          aria-label="Confirm appointment"
-                        >
-                          <Check className="h-4 w-4" />
-                        </button>
-                        <button
-                          type="button"
-                          disabled={savingId === appointment.id}
-                          onClick={() => handleStatus(appointment.id, 'cancelled')}
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-rose-600 text-white hover:bg-rose-700 disabled:opacity-60"
-                          aria-label="Cancel appointment"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        ) : filteredAppointments.length === 0 ? (
+          <div className="admin-empty">
+            <CalendarDays className="h-8 w-8" />
+            <h2>No appointments found</h2>
+            <p>Try a different search or status filter.</p>
           </div>
+        ) : (
+          <>
+            <div className="admin-card-list">
+              {filteredAppointments.map((appointment) => (
+                <AppointmentCard
+                  key={appointment.id}
+                  appointment={appointment}
+                  savingId={savingId}
+                  onStatus={handleStatus}
+                />
+              ))}
+            </div>
+
+            <div className="admin-table-wrap">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Patient</th>
+                    <th>Contact</th>
+                    <th>Treatment</th>
+                    <th>Visit</th>
+                    <th>Notes</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredAppointments.map((appointment) => (
+                    <tr key={appointment.id}>
+                      <td>
+                        <strong>{appointment.name}</strong>
+                        <span>
+                          {[appointment.age, appointment.gender].filter(Boolean).join(' / ') || '-'}
+                        </span>
+                      </td>
+                      <td>
+                        <a href={`tel:${appointment.phone}`}>{appointment.phone}</a>
+                        <span>{appointment.email || '-'}</span>
+                      </td>
+                      <td>{appointment.treatment_interest || '-'}</td>
+                      <td>
+                        <strong>{formatDate(appointment.date)}</strong>
+                        <span>{appointment.time || '-'}</span>
+                      </td>
+                      <td className="admin-notes">{appointment.notes || '-'}</td>
+                      <td>
+                        <StatusBadge status={appointment.status} />
+                      </td>
+                      <td>
+                        <StatusActions
+                          appointment={appointment}
+                          savingId={savingId}
+                          onStatus={handleStatus}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </section>
     </main>
+  );
+}
+
+function StatusBadge({ status }) {
+  return <span className={`admin-status ${statusStyles[status] || statusStyles.pending}`}>{status}</span>;
+}
+
+function StatusActions({ appointment, savingId, onStatus }) {
+  const isSaving = savingId === appointment.id;
+
+  return (
+    <div className="admin-row-actions">
+      <button
+        type="button"
+        disabled={isSaving || appointment.status === 'confirmed'}
+        onClick={() => onStatus(appointment.id, 'confirmed')}
+        className="admin-confirm-button"
+        aria-label="Confirm appointment"
+      >
+        <Check className="h-4 w-4" />
+      </button>
+      <button
+        type="button"
+        disabled={isSaving || appointment.status === 'cancelled'}
+        onClick={() => onStatus(appointment.id, 'cancelled')}
+        className="admin-cancel-button"
+        aria-label="Cancel appointment"
+      >
+        <X className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
+
+function AppointmentCard({ appointment, savingId, onStatus }) {
+  return (
+    <article className="admin-appointment-card">
+      <div className="admin-card-topline">
+        <div>
+          <h2>{appointment.name}</h2>
+          <p>{appointment.treatment_interest || 'General visit'}</p>
+        </div>
+        <StatusBadge status={appointment.status} />
+      </div>
+
+      <div className="admin-card-details">
+        <span>
+          <CalendarDays className="h-4 w-4" />
+          {formatDate(appointment.date)}
+        </span>
+        <span>
+          <Clock className="h-4 w-4" />
+          {appointment.time || '-'}
+        </span>
+        <span>
+          <Phone className="h-4 w-4" />
+          {appointment.phone}
+        </span>
+        <span>
+          <Mail className="h-4 w-4" />
+          {appointment.email || '-'}
+        </span>
+        <span>
+          <UserRound className="h-4 w-4" />
+          {[appointment.age, appointment.gender].filter(Boolean).join(' / ') || '-'}
+        </span>
+      </div>
+
+      {appointment.notes && <p className="admin-card-notes">{appointment.notes}</p>}
+
+      <StatusActions appointment={appointment} savingId={savingId} onStatus={onStatus} />
+    </article>
   );
 }
